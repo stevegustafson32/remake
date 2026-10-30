@@ -52,4 +52,4 @@ A paid font (flag "paid font") must go unless the user owns a licence. Swap with
 
 The first `apply` saves the last score of the untouched remake; the report keeps using it, because the site is meant to stop looking like the original now. Open the remake in the browser pane after applying to check nothing broke (text overflowing a box, a photo cropped badly). `remake score` still works if you want numbers, but it measures distance from the original, which is no longer the goal.
 
-Remove the passcode only when the user asks and the board shows 100%: `vercel env rm REMAKE_PASSCODE production --yes` in the project, then `vercel deploy --prod --yes`. Make the repo public only when the user asks. Running `remake ship` again turns the passcode back on: after opening the site, redeploy with `vercel deploy --prod --yes`.
+This fork has no hosting step. The remake runs locally (`remake serve`) and lives in a private repo. Make the repo public, or move `site/` into a host of the user's own, only when the user asks and the board shows 100%.

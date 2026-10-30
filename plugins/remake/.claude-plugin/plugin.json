@@ -2,10 +2,10 @@
   "name": "remake",
   "displayName": "Remake",
   "version": "0.1.0",
-  "description": "Remake any website pixel for pixel, ship it privately to your GitHub and Vercel, then make it yours.",
+  "description": "Remake any website pixel for pixel, keep it private on your machine and GitHub, then make it yours.",
   "author": { "name": "Ruben Hassid from the newsletter How to AI", "url": "https://ruben.substack.com" },
   "homepage": "https://github.com/rubenhassid1/remake",
   "repository": "https://github.com/rubenhassid1/remake",
   "license": "MIT",
-  "keywords": ["website", "clone", "remake", "pixel-perfect", "vercel", "github", "reverse-engineering"]
+  "keywords": ["website", "clone", "remake", "pixel-perfect", "github", "reverse-engineering"]
 }

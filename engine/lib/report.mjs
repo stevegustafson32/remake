@@ -81,21 +81,20 @@ export function report(project) {
   add("Swap checklist", !!boardOk, content ? `${content.summary.total} slots, ${content.summary.yours}% yours` : "not built", "run `remake slots` then `remake board`");
 
   let liveOk = false;
-  let liveEvidence = "not deployed";
+  let liveEvidence = "not shipped";
   if (ship) {
     const head = sh("git", ["rev-parse", "HEAD"], { cwd: root, allowFail: true }).stdout?.trim();
-    // REPORT.md is written by this command and .gitignore by the Vercel CLI: neither is a site change.
+    // REPORT.md is written by this command: not a site change.
     const changed = (sh("git", ["status", "--porcelain"], { cwd: root, allowFail: true }).stdout || "")
       .split("\n")
       .filter((l) => l.trim() && !/\s(REPORT\.md|\.gitignore)$/.test(l));
     const clean = changed.length === 0;
     const current = head === ship.commit && clean;
-    const isPrivate = !ship.visibility || ship.visibility === "PRIVATE";
-    const hidden = ship.verified !== "yes" || ship.check?.noindex;
-    liveOk = ["yes", "checkpoint"].includes(ship.verified) && current && isPrivate && hidden;
-    liveEvidence = `${ship.url} · gate ${ship.verified === "yes" ? "verified" : ship.verified === "checkpoint" ? "behind Vercel's bot check, open it in a browser to confirm" : "not verified"}${isPrivate ? "" : " · the repo is not private"}${hidden ? "" : " · search engines aren't told to stay away"}${current ? "" : " · changes since the last deploy"}`;
+    const isPrivate = !ship.repo || !ship.visibility || ship.visibility === "PRIVATE";
+    liveOk = ship.verified === "local" && current && isPrivate;
+    liveEvidence = `${ship.repo || "local only"} · ${ship.verified === "local" ? "serves from site/ on its own" : "local check failed"}${isPrivate ? "" : " · the repo is not private"}${current ? "" : " · changes since the last ship"}`;
   }
-  add("Live and private", liveOk, liveEvidence, "run `remake ship` (after the last change)");
+  add("Committed and private", liveOk, liveEvidence, "run `remake ship` (after the last change)");
 
   const done = missing.length === 0;
   const lines = [];
@@ -107,12 +106,12 @@ export function report(project) {
       for (const f of acceptedNow) lines.push(`  - ${f}: ${accepted.find((a) => a.key === f.replace(/: [\d.]+%$/, "")).reason}`);
     }
   }
-  if (ship) lines.push("", `Live:     ${ship.url}`, `Passcode: ${ship.passcode}`, `Repo:     ${ship.repo} (${(ship.visibility || "PRIVATE").toLowerCase()})`, `Proof:    ${ship.url}/_remake/`, `Swap:     ${ship.url}/_remake/swap/  ·  checklist: MAKE-IT-YOURS.md`);
+  if (ship) lines.push("", `Local:    ${ship.url}  (remake serve)`, `Repo:     ${ship.repo || "none"} (${(ship.visibility || "LOCAL").toLowerCase()})`, `Proof:    ${ship.url}/_remake/`, `Swap:     ${ship.url}/_remake/swap/  ·  checklist: MAKE-IT-YOURS.md`);
   lines.push("");
   if (done) lines.push(acceptedNow.length ? `REMAKE COMPLETE (with ${acceptedNow.length} accepted difference${acceptedNow.length > 1 ? "s" : ""})` : "REMAKE COMPLETE");
   else lines.push("REMAKE NOT DONE", ...missing.map((m) => `  - ${m}`));
   const text = lines.join("\n");
   say(text);
-  writeFile(p.report, "# Remake report\n\n```\n" + text.replace(/Passcode: .*/, "Passcode: (in remake/ship.json, not committed)") + "\n```\n");
+  writeFile(p.report, "# Remake report\n\n```\n" + text + "\n```\n");
   return { done, missing };
 }

@@ -1,18 +1,18 @@
 ---
 name: remake
-description: Remake any website pixel for pixel with the Remake engine, ship it to the user's private GitHub repo and Vercel behind a passcode, then build the swap board that makes it theirs. Use when someone asks to remake, clone, copy, rebuild or reverse-engineer a website or landing page, wants "this site, but mine", or sends "/goal Remake <url> with github.com/rubenhassid1/remake …".
+description: Remake any website pixel for pixel with the Remake engine, keep it on the user's machine and in a private GitHub repo (no hosting step), then build the swap board that makes it theirs. Use when someone asks to remake, clone, copy, rebuild or reverse-engineer a website or landing page, wants "this site, but mine", or sends "/goal Remake <url> with github.com/stevegustafson32/remake …".
 ---
 
 # Remake
 
-Turn a URL into a working copy that matches the original on every screen, put it live on the user's own GitHub and Vercel (private, passcode, hidden from search engines), then hand them a swap board listing every text, photo, video, font, logo and link to replace so the site becomes theirs.
+Turn a URL into a working copy that matches the original on every screen, keep it on the user's machine and in a private GitHub repo (this fork has no Vercel or hosting step; `remake serve` runs it at http://127.0.0.1:4310), then hand them a swap board listing every text, photo, video, font, logo and link to replace so the site becomes theirs.
 
 The finish line is the last line of `remake report`: **REMAKE COMPLETE**. Under `/goal`, the judge only reads this conversation, so paste the full report output into the chat every time you run it.
 
 ## 0. Set up the engine (once per machine)
 
 ```bash
-[ -d ~/.remake ] || gh repo clone rubenhassid1/remake ~/.remake -- --depth 1 || git clone --depth 1 https://github.com/rubenhassid1/remake ~/.remake
+[ -d ~/.remake ] || gh repo clone stevegustafson32/remake ~/.remake -- --depth 1 || git clone --depth 1 https://github.com/stevegustafson32/remake ~/.remake
 git -C ~/.remake pull --ff-only --quiet; npm --prefix ~/.remake install --silent
 npm install -g ~/.remake --silent   # puts a `remake` command on the PATH
 remake doctor --fix
@@ -20,7 +20,7 @@ remake doctor --fix
 
 If the global install isn't allowed on this machine, use `node ~/.remake/engine/bin/remake.mjs` wherever this skill says `remake`. Shell aliases don't survive between tool calls, so don't rely on one.
 
-`doctor --fix` installs Chromium for Playwright and the Vercel CLI. If GitHub or Vercel isn't signed in, run `gh auth login --web` or `vercel login` yourself and tell the user, in one sentence, that a browser tab opened and they should click Authorize. That is the only thing the user does.
+`doctor --fix` installs Chromium for Playwright. If GitHub isn't signed in, run `gh auth login --web` yourself and tell the user, in one sentence, that a browser tab opened and they should click Authorize. That is the only thing the user does. (On this machine `~/remake` is the working clone of the fork; `node ~/remake/engine/bin/remake.mjs` works too.)
 
 ## 1. Refuse what Remake is not for
 
@@ -28,7 +28,7 @@ If the global install isn't allowed on this machine, use `node ~/.remake/engine/
 - **Passing as the original.** If the user wants to publish the copy under the original's name, collect its visitors' details, or send people to it as if it were the real company, stop and say why.
 - **Bot walls.** If capture says the site shows a bot check, tell the user. Offer `remake capture --archive` (rebuild from the Internet Archive's copy) or another site. Never use proxies, stealth browsers, a fake user agent or CAPTCHA solvers.
 
-A private remake of a public marketing page, to learn from or to turn into your own site, is the use case. The passcode stays on until the swap board reaches 100%.
+A private remake of a public marketing page, to learn from or to turn into your own site, is the use case. The remake stays on this machine and in a private repo until the swap board reaches 100%.
 
 ## 2. The loop
 
@@ -42,7 +42,7 @@ A private remake of a public marketing page, to learn from or to turn into your 
    - Fix files in `site/` directly, then re-score only what you touched: `remake score --page / --viewport phone --no-motion`. Run the full `remake score` before shipping.
    - Known causes and fixes: [references/fixing.md](references/fixing.md). After two failed attempts on the same screen, ask the `remake-judge` agent for a fresh read.
 5. **List what's theirs.** `remake slots` writes `remake/content.json`, then `remake board` builds the proof page (`/_remake/`), the swap board (`/_remake/swap/`) and `MAKE-IT-YOURS.md`.
-6. **Ship.** `remake ship`. Private GitHub repo, Vercel deploy, passcode in the `REMAKE_PASSCODE` variable, gate checked from outside. The user's request to put it on their GitHub and Vercel is the go-ahead; don't ask again. Never make the repo public or remove the passcode unless the user says so.
+6. **Ship.** `remake ship`. Commits the project, saves it to a private GitHub repo (`--no-remote` keeps it on this machine only), and checks that `site/` serves on its own from a local server. The user's request to remake the site is the go-ahead; don't ask again. Never make the repo public unless the user says so.
 7. **Report.** `remake report`. Paste the whole output. If it says REMAKE NOT DONE, work on what it lists: a change after shipping means score, then ship, then report again.
 
 ## 3. Rules while repairing
@@ -58,12 +58,12 @@ A private remake of a public marketing page, to learn from or to turn into your 
 When the report says REMAKE COMPLETE, end with:
 
 1. The report output (already pasted) and one line on what you fixed.
-2. Live link, passcode, private repo, proof page (`<url>/_remake/`), swap board (`<url>/_remake/swap/`).
+2. How to open it (`remake serve`, then http://127.0.0.1:4310), the private repo, proof page (`/_remake/`), swap board (`/_remake/swap/`).
 3. **What I need from you to make it yours**: one line per group from `MAKE-IT-YOURS.md` (copy, photos, videos, logos, fonts, colours, links and forms), with the counts and the flags (paid fonts, photos and trademarks that belong to the original, videos still streaming from their account).
 
 ## 5. Making it yours (when the user sends material)
 
-Read [references/swap.md](references/swap.md). In short: fill the `swap` field of each slot in `remake/content.json` (new words in the user's voice at the same length, photos matched by shape, a free look-alike font from Google Fonts, their colours, links and form address), then `remake apply`, `remake board`, `remake score` (layout should hold even though content changed), `remake ship`, `remake report`. Remove the passcode only when the user asks and the board shows 100%.
+Read [references/swap.md](references/swap.md). In short: fill the `swap` field of each slot in `remake/content.json` (new words in the user's voice at the same length, photos matched by shape, a free look-alike font from Google Fonts, their colours, links and form address), then `remake apply`, `remake board`, `remake score` (layout should hold even though content changed), `remake ship`, `remake report`. Make the repo public only when the user asks and the board shows 100%.
 
 ### New pictures without theirs
 

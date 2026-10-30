@@ -60,7 +60,7 @@ Original screens are cached in `remake/original/`, so re-scoring after a fix onl
 
 ## 6. Shipping and the report
 
-`remake ship` commits, creates a private GitHub repo (`gh`), links and deploys to Vercel (`vercel`), and stores the passcode in the `REMAKE_PASSCODE` environment variable. The gate is Vercel Routing Middleware (`middleware.js`): without the right cookie every path returns a passcode page with `401`; the cookie holds a SHA-256 of the passcode, never the passcode. Then it checks from outside: locked without the passcode, open with it, `noindex` on every response.
+`remake ship` commits, creates a private GitHub repo (`gh`, skipped with `--no-remote`), then starts a throwaway local server on `site/` and fetches the first page to prove the folder runs on its own. This fork removed the upstream Vercel deploy and passcode middleware: a remake is served by `remake serve` on this machine and never published by the engine.
 
 `remake report` checks: captured, desktop match, phone match, motion match, score newer than the last change, swap checklist built, live and private with the deployed commit equal to the current one. Only when all pass does it print REMAKE COMPLETE. Accepted differences are listed with their reasons, and can only be accepted at 90% or more.
 

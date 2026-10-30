@@ -27,18 +27,6 @@ export async function doctor({ fix = false } = {}) {
   else if (!has("gh", ["auth", "status"]).ok) todo.push(["GitHub sign-in", "Run `gh auth login --web` and click through once in your browser."]);
   else ok("GitHub CLI, signed in");
 
-  let vercel = has("vercel");
-  if (!vercel.ok && fix) {
-    say("  installing Vercel CLI…");
-    spawnSync("npm", ["install", "-g", "vercel"], { stdio: "inherit" });
-    vercel = has("vercel");
-  }
-  if (!vercel.ok) todo.push(["Vercel CLI", "Run `npm install -g vercel`."]);
-  else {
-    const who = has("vercel", ["whoami"]);
-    who.ok ? ok(`Vercel CLI, signed in as ${who.out.split("\n").pop()}`) : todo.push(["Vercel sign-in", "Run `vercel login` and click through once in your browser."]);
-  }
-
   let browserOk = false;
   try {
     const b = await chromium.launch();
