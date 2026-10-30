@@ -656,6 +656,7 @@ async function sourceMaps(files, store, polite, p, opts) {
   if (opts.noSourceMaps) return { maps: 0, files: 0 };
   let maps = 0;
   let written = 0;
+  let skipped = 0;
   const done = new Set();
   for (const f of files) {
     if (!/\.(m?js|css)$/.test(f.rel)) continue;
@@ -686,9 +687,16 @@ async function sourceMaps(files, store, polite, p, opts) {
       const clean = src.replace(/^[a-z]+:\/\/\/?/i, "").replace(/^(\.\.\/|\.\/)+/, "").replace(/[?#].*$/, "").replace(/[<>:"|*]/g, "_")
         .split("/").filter((s) => s && s !== "." && s !== "..").join("/"); // never outside remake/sources/
       if (!clean) return;
-      writeFile(path.join(p.sources, host, clean), content);
-      written++;
+      // A source path can collide with a folder of the same name (Next.js emits both `_N_E` and `_N_E/...`).
+      try {
+        writeFile(path.join(p.sources, host, clean), content);
+        written++;
+      } catch (e) {
+        if (!["EISDIR", "ENOTDIR", "EEXIST"].includes(e.code)) throw e;
+        skipped++;
+      }
     });
   }
-  return { maps, files: written };
+  if (skipped) say(`  ! ${skipped} source file(s) skipped: their paths collide with folders of the same name`);
+  return { maps, files: written, skipped };
 }
